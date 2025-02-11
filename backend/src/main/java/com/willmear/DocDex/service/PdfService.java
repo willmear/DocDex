@@ -29,11 +29,6 @@ public class PdfService {
             splitter.setSplitAtPage(1);
             List<PDDocument> documents = splitter.split(document);
             PDFTextStripper stripper = new PDFTextStripper();
-            System.out.println("READ\n\n");
-            String text = stripper.getText(document);
-            System.out.println(stripper.getText(documents.get(0)));
-            System.out.println("\n\n\n\n\n\n\n");
-            System.out.println(stripper.getText(documents.get(1)));
 
             List<Document> documentList = new ArrayList<>();
 
