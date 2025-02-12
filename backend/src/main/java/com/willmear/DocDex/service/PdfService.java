@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -30,9 +32,13 @@ public class PdfService {
 
             List<Document> documentList = new ArrayList<>();
 
+            Integer docs = 1;
             for (PDDocument document1 : documents) {
-                Document document2 = new Document(stripper.getText(document1));
+                Map<String, Object> metadata = new HashMap<>();
+                metadata.put("page", docs);
+                Document document2 = new Document(stripper.getText(document1), metadata);
                 documentList.add(document2);
+                docs++;
             }
 
 

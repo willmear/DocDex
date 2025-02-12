@@ -11,8 +11,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import javax.print.Doc;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -25,17 +26,35 @@ public class EmbeddingService {
 
     public void addDocuments() throws IOException {
 
-        List<Document> documentsList = pdfService.readPDF();
+//        List<Document> documentsList = pdfService.readPDF();
+
 
 //        vectorStore.add(new TokenTextSplitter(300, 300, 5, 1000, true).split(documentsList));
 
-        List<Document> results = this.vectorStore.similaritySearch(SearchRequest.builder().query("autoconfiguration of postgresql").topK(5).build());
+        List<Document> results = orderByPage(Objects.requireNonNull(this.vectorStore
+                .similaritySearch(SearchRequest.builder().query("What is a Bean").topK(5).build())));
 
-        for (Document doc : results) {
-            System.out.println(doc.getText());
+        System.out.println(results);
+
+    }
+
+    private List<Document> orderByPage(List<Document> documentList) {
+
+        List<Document> orderedDocuments = new ArrayList<>();
+        for (int i = 1; i < documentList.size(); i++) {
+            for (int j = 0; j < i; j++) {
+                if ((Integer) documentList.get(j).getMetadata().get("page") > (Integer) documentList.get(i).getMetadata().get("page")) {
+                    Document temp = documentList.get(i);
+                    documentList.remove(i);
+                    documentList.add(j, temp);
+                }
+            }
         }
 
 
+
+
+        return documentList;
     }
 
 }
