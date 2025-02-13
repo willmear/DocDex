@@ -1,5 +1,6 @@
 package com.willmear.DocDex.service;
 
+import com.willmear.DocDex.entity.dto.CompletionDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
@@ -19,8 +20,10 @@ import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -35,10 +38,8 @@ public class ChatCompletionService {
     @Autowired
     private ChatClient.Builder chatClientBuilder;
 
-    String userText = "What is a bean";
 
-
-    public void chatCompletion() {
+    public ResponseEntity<CompletionDto> chatCompletion(String question) {
 
         DocumentRetriever retriever = VectorStoreDocumentRetriever.builder()
                 .similarityThreshold(0.75)
@@ -55,27 +56,35 @@ public class ChatCompletionService {
                 .documentRetriever(retriever)
                 .build();
 
+        List<Document> documents = retriever.retrieve(new Query(question));
 
-        List<Document> documents = retriever.retrieve(queryTransformer.transform(new Query(userText)));
 
-
-//        ChatResponse response = ChatClient.builder(chatModel)
-//                .build().prompt()
-//                .advisors(new QuestionAnswerAdvisor(vectorStore))
-//                .user(userText)
-//                .call()
-//                .chatResponse();
 
         ChatResponse response = ChatClient.builder(chatModel)
                         .build().prompt()
                         .advisors(retrievalAugmentationAdvisor)
-                        .user(userText)
-                .system("You are a Spring Boot expert. The provided context is from the Spring documentation that thee user has not provided.")
+                        .user(question)
+                .system("You are a Spring Boot expert. The provided context is from the Spring documentation.")
                         .call()
                     .chatResponse();
 
-        System.out.println(response);
 
+        assert response != null;
+        String textResponse = response.getResult().getOutput().getContent();
+        System.out.println(textResponse);
+
+        List<Integer> pages = new ArrayList<>();
+
+        for (Document document: documents) {
+            pages.add((Integer) document.getMetadata().get("page"));
+        }
+
+        CompletionDto completionDto = CompletionDto.builder()
+                .text(textResponse)
+                .pages(pages)
+                .build();
+
+        return ResponseEntity.ok(completionDto);
     }
 
 }

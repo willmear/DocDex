@@ -26,10 +26,10 @@ public class EmbeddingService {
 
     public void addDocuments() throws IOException {
 
-//        List<Document> documentsList = pdfService.readPDF();
+        List<Document> documentsList = pdfService.readPDF();
 
 
-//        vectorStore.add(new TokenTextSplitter(300, 300, 5, 1000, true).split(documentsList));
+        vectorStore.add(new TokenTextSplitter(500, 500, 7, 2000, true).split(documentsList));
 
         List<Document> results = orderByPage(Objects.requireNonNull(this.vectorStore
                 .similaritySearch(SearchRequest.builder().query("What is a Bean in spring boot").topK(5).build())));
