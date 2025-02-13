@@ -1,5 +1,6 @@
 package com.willmear.DocDex;
 
+import com.willmear.DocDex.service.ChatCompletionService;
 import com.willmear.DocDex.service.EmbeddingService;
 import com.willmear.DocDex.service.PdfService;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +15,12 @@ public class CommandLineAppStartupRunner implements CommandLineRunner {
     private PdfService pdfService;
     @Autowired
     private EmbeddingService embeddingService;
+    @Autowired
+    private ChatCompletionService chatCompletionService;
 
     @Override
     public void run(String... args) throws Exception {
-        embeddingService.addDocuments();
+//        embeddingService.addDocuments();
+        chatCompletionService.chatCompletion();
     }
 }

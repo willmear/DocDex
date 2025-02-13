@@ -32,7 +32,7 @@ public class EmbeddingService {
 //        vectorStore.add(new TokenTextSplitter(300, 300, 5, 1000, true).split(documentsList));
 
         List<Document> results = orderByPage(Objects.requireNonNull(this.vectorStore
-                .similaritySearch(SearchRequest.builder().query("What is a Bean").topK(5).build())));
+                .similaritySearch(SearchRequest.builder().query("What is a Bean in spring boot").topK(5).build())));
 
         System.out.println(results);
 
@@ -50,7 +50,6 @@ public class EmbeddingService {
                 }
             }
         }
-
 
 
 
