@@ -13,59 +13,14 @@ interface Chat {
 }
 
 
-// async function getChat(question:string) {
-
-//     const res = await fetch(`http://localhost:8080/api/v1/chat-completion/question/${question}`, {
-//         cache: 'no-cache',    
-//     })
-//     const chat: Chat = await res.json();
-
-//     if (!chat) notFound();
-
-//     return chat;    
-// }
-
-// const socket = io("http://localhost:8080/websocket");
-
 export default function Chat() {
 
-  // const [chats, setChats] = useState<Record<string, Chat>>({})
-  // const [message, setMessage] = useState('');
+  let chatLog: Chat[] = [];
 
-
-  // useEffect(() => {
-
-  //   socket.on("connect", () => {
-  //     console.log("Connected to WebSocket");
-  //   });
-
-  //   socket.on("/topic/questions", (data: Chat) => {
-  //     console.log("subscribed")
-  //     setChats(prevChats => ({
-  //       ...prevChats,
-  //       [data.id]: {
-  //         ...data,
-  //         timestamp: Date.now()
-  //       }
-  //     }));
-  //   });
-
-
-  //   return () => {
-  //     socket.disconnect()
-  //   }
-
-
-  // }, []);
-
-  // const sendMessage = () => {
-  //   socket.emit('/app/question', "what is autoconfiguration");
-  //   console.log("sent")
-  //   setMessage('');
-  // }
 
   const [message, setMessage] = useState("");
   const [question, setQuestion] = useState("");
+  const [log, setLog] = useState<string[]>([]);
   const [stompClient, setStompClient] = useState<Client | null>(null);
 
   useEffect(() => {
@@ -77,6 +32,7 @@ export default function Chat() {
               // Subscribe to the topic
               client.subscribe("/topic/questions", (msg) => {
                   setMessage(msg.body);
+                  setLog((prevMessages) =>   [...prevMessages, msg.body]);
               });
           },
           onDisconnect: () => {
@@ -97,34 +53,79 @@ export default function Chat() {
               destination: "/app/question",
               body: question,
           });
+          setLog((prevMessages) =>   [...prevMessages, question]);
           setQuestion("");
       }
   };
+  
 
 
   return (
-    <>
-    chat page
-    <div>
-      {/* {Object.entries(chats).map(([id, chat]) => (
-        <div
-        key={id}
-        className="flex">
-          {chat.text}
+    <div className="flex min-h-screen w-screen text-gray-100">
+
+
+      <div className="min-h-full w-1/5 min-w-1/5 left-0 bg-[#171717] text-gray-100 shadow-sm">
+
+        Conversations
+      </div>
+
+
+
+      <div className="flex-1 min-h-full flex flex-col bg-[#212121] opacity-90">
+
+
+        <div className="w-full flex flex-col h-1/5 top-0 bg-[#323232] py-2 px-4 shadow-2xs">
+
+          <span className="text-xl font-medium">
+            Documentation
+          </span>
+
+          <div className="flex flex-1 py-2 gap-6">
+            <div className="border">Hello</div>
+            <div className="border">Hello</div>
+            <div className="border">Hello</div>
+            
+          </div>
+
         </div>
-      ))} */}
-      <p>{message}</p>
+
+        <div className="flex-1 flex justify-center text-xl">
+
+          <div className="flex w-3/4">
+          Text: {message}
+          </div>
+
+          
+
+        </div>
 
 
-      <input
-            type="text"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-      />
-      <button onClick={sendMessage}>Send</button>
+        <div className="h-1/4 flex justify-center">
+
+          <div className="flex flex-col justify-end w-3/4">
+
+          <textarea className="rounded-3xl shadow-lg h-full max-h-full text-left p-5 bg-[#323232] opacity-85"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+          />
+          <button className="h-1/4" onClick={sendMessage}>Send</button>
+          
+          </div>
+
+          
+        </div>
+
+        
+      </div>
+    
+      
+
+      
+
+
+      
+      
+    
     </div>
-    
-    
-    </>
   );
 }
