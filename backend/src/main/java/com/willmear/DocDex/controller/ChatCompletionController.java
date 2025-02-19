@@ -16,10 +16,10 @@ public class ChatCompletionController {
 
     private final ChatCompletionService completionService;
 
-    @GetMapping("/question/{question}")
-    public ResponseEntity<CompletionDto> askQuestion(@PathVariable String question) {
-        System.out.println(question);
-        return completionService.chatCompletion(question);
-    }
+//    @GetMapping("/question/{question}")
+//    public ResponseEntity<CompletionDto> askQuestion(@PathVariable String question) {
+//        System.out.println(question);
+//        return completionService.chatCompletion(question);
+//    }
 
 }

@@ -39,7 +39,7 @@ public class ChatCompletionService {
     private ChatClient.Builder chatClientBuilder;
 
 
-    public ResponseEntity<CompletionDto> chatCompletion(String question) {
+    public CompletionDto chatCompletion(String question) {
 
         DocumentRetriever retriever = VectorStoreDocumentRetriever.builder()
                 .similarityThreshold(0.75)
@@ -52,7 +52,7 @@ public class ChatCompletionService {
                 .build();
 
         Advisor retrievalAugmentationAdvisor = RetrievalAugmentationAdvisor.builder()
-                .queryTransformers(queryTransformer)
+//                .queryTransformers(queryTransformer)
                 .documentRetriever(retriever)
                 .build();
 
@@ -84,7 +84,7 @@ public class ChatCompletionService {
                 .pages(pages)
                 .build();
 
-        return ResponseEntity.ok(completionDto);
+        return completionDto;
     }
 
 }
