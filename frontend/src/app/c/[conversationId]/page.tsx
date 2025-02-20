@@ -1,27 +1,60 @@
 'use client'
 
-import { notFound } from "next/navigation";
+import { notFound, redirect, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { io } from "socket.io-client";
 import { Client } from "@stomp/stompjs";
+import { error } from "console";
+import React from "react";
 
 
-interface Chat {
+interface Completion {
     id: number
     text: string
+    sentAt: Date
+    senderType: senderType
     pages: number[]
+}
+interface Conversation {
+  id: number
+  messages: Completion[]
+  name: string
+}
+
+enum senderType {
+  USER,
+  SYSTEM
 }
 
 
 export default function Chat() {
 
-  let chatLog: Chat[] = [];
+  const params = useParams()
 
 
   const [message, setMessage] = useState("");
   const [question, setQuestion] = useState("");
-  const [log, setLog] = useState<string[]>([]);
+  const [log, setLog] = useState<Completion[]>([]);
   const [stompClient, setStompClient] = useState<Client | null>(null);
+
+  
+  useEffect(() => {
+
+    const fetchConversation = async () => {
+      try {
+        const res = await fetch(`http://localhost:8080/api/v1/conversation/${params.conversationId}`);
+        if (!res.ok) throw new Error("Conversation not found");
+
+        const conversationData: Conversation = await res.json();
+        setLog(conversationData.messages);
+        console.log(conversationData)
+        console.log(log)
+      } catch (error) {
+        console.error("Error fetching conversation:", error);
+      }
+    };
+
+    if (params.conversationId) fetchConversation();
+  }, [params.conversationId]);
 
   useEffect(() => {
       const client = new Client({
@@ -31,8 +64,14 @@ export default function Chat() {
               console.log("Connected to WebSocket");
               // Subscribe to the topic
               client.subscribe("/topic/questions", (msg) => {
-                  setMessage(msg.body);
-                  setLog((prevMessages) =>   [...prevMessages, msg.body]);
+                const parsedData: Completion = JSON.parse(msg.body);
+                console.log(parsedData);
+                // setMessage(parsedData.text);
+                setLog((prevMessages) =>   [...prevMessages, parsedData]);
+                  
+
+                  // setMessage(msg.body);
+                  // setLog((prevMessages) =>   [...prevMessages, msg.body]);
               });
           },
           onDisconnect: () => {
@@ -51,12 +90,22 @@ export default function Chat() {
       if (stompClient && stompClient.connected) {
           stompClient.publish({
               destination: "/app/question",
-              body: question,
+              body: JSON.stringify({
+                "text":question,
+                "conversationId": params.conversationId
+              }),
           });
-          setLog((prevMessages) =>   [...prevMessages, question]);
+          // setLog((prevMessages) =>   [...prevMessages, question]);
           setQuestion("");
       }
   };
+  interface Completion {
+    id: number
+    text: string
+    sentAt: Date
+    senderType: senderType
+    pages: number[]
+}
   
 
 
@@ -91,8 +140,13 @@ export default function Chat() {
 
         <div className="flex-1 flex justify-center text-xl">
 
-          <div className="flex w-3/4">
-          Text: {message}
+          <div className="flex flex-col w-3/4">
+          {log.map((msg) => (
+              <div key={msg.id} className="p-2 border-b">
+                <strong>{msg.senderType === senderType.USER ? "You" : "System"}:</strong> {msg.text}
+              </div>
+            ))}
+          
           </div>
 
           

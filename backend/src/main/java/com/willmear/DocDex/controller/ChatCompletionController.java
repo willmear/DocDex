@@ -1,25 +1,31 @@
 package com.willmear.DocDex.controller;
 
+import com.willmear.DocDex.entity.Chat;
 import com.willmear.DocDex.entity.dto.CompletionDto;
+import com.willmear.DocDex.entity.dto.QuestionDto;
 import com.willmear.DocDex.service.ChatCompletionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.stereotype.Controller;
 
-@RestController
-@RequestMapping("api/v1/chat-completion")
+import java.util.List;
+
+@Controller
 @RequiredArgsConstructor
 public class ChatCompletionController {
 
     private final ChatCompletionService completionService;
 
-//    @GetMapping("/question/{question}")
-//    public ResponseEntity<CompletionDto> askQuestion(@PathVariable String question) {
-//        System.out.println(question);
-//        return completionService.chatCompletion(question);
-//    }
+    @MessageMapping("/question")
+    @SendTo("/topic/questions")
+    public Chat askQuestion(@Payload QuestionDto question) {
+        System.out.println(question);
+
+        return completionService.chatCompletion(question);
+    }
+
 
 }
